@@ -1,0 +1,30 @@
+concurrent = 1
+check_interval = 0
+
+[[runners]]
+  name = "test-ci"
+  url = "http://gitlab.asoco.com.cn/"
+  token = "31005529438426360e84ce79719d53"
+  executor = "shell"
+  [runners.cache]
+
+[[runners]]
+  name = "WisdomNatDefense-1.202"
+  url = "http://gitlab.asoco.com.cn/"
+  token = "adfbfb2ae40a585602eb13c63a1d7c"
+  executor = "shell"
+  [runners.cache]
+
+[[runners]]
+  name = "ChemicalIndustryPark-1.202-docker"
+  url = "http://192.168.1.116/"
+  token = "9d980e4a83834fb3d972f8f6befc0f"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "harbor.asoco.com.cn/android/android-env:v3"
+    privileged = false
+    disable_cache = false
+    volumes = ["/cache","/docker/ci-cache/.gradle:/root/.gradle"]
+    shm_size = 0
+  [runners.cache]

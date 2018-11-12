@@ -1,0 +1,17 @@
+image: harbor.asoco.com.cn/android/android-env:v1
+
+stages:
+  - build
+  
+  
+build:
+  stage: build
+  script:
+    - /bin/bash gradlew assembleRelease
+  artifacts:
+    name: WisdomNatDefense-$(date +%Y%m%d)
+    paths:
+    - app/build/outputs/
+  only:
+    - command_test
+
