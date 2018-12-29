@@ -2,29 +2,38 @@ concurrent = 1
 check_interval = 0
 
 [[runners]]
-  name = "test-ci"
+  name = "smart-factory-transfar-display-2.99-shell"
   url = "http://gitlab.asoco.com.cn/"
-  token = "31005529438426360e84ce79719d53"
+  token = "2a2455e87baf11c764673b8aaa62d6"
   executor = "shell"
   [runners.cache]
 
 [[runners]]
-  name = "WisdomNatDefense-1.202"
+  name = "mavendemo-2.99-DinD"
   url = "http://gitlab.asoco.com.cn/"
-  token = "adfbfb2ae40a585602eb13c63a1d7c"
-  executor = "shell"
-  [runners.cache]
-
-[[runners]]
-  name = "ChemicalIndustryPark-1.202-docker"
-  url = "http://192.168.1.116/"
-  token = "9d980e4a83834fb3d972f8f6befc0f"
+  token = "424f19a4dfe946965f8dae944aa292"
   executor = "docker"
   [runners.docker]
     tls_verify = false
-    image = "harbor.asoco.com.cn/android/android-env:v3"
+    image = "docker:18.06.1"
     privileged = false
     disable_cache = false
-    volumes = ["/cache","/docker/ci-cache/.gradle:/root/.gradle"]
+    volumes = ["/builds", "/var/run/docker.sock:/var/run/docker.sock", "/docker/cache/.m2:/root/.m2", "/usr/local/maven/conf/settings.xml:/usr/share/maven/conf/settings.xml"]
+    pull_policy = "if-not-present"
+    shm_size = 0
+  [runners.cache]
+
+[[runners]]
+  name = "node-DinD-2.99"
+  url = "http://gitlab.asoco.com.cn/"
+  token = "d9eb037cc6483cd89158685d82b07b"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "nginx:1.14-alpine"
+    privileged = false
+    disable_cache = false
+    volumes = ["/docker/cache/yarn/.cache:/usr/local/share/.cache", "/var/run/docker.sock:/var/run/docker.sock"]
+    pull_policy = "if-not-present"
     shm_size = 0
   [runners.cache]
