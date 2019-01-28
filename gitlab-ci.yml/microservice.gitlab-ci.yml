@@ -1,0 +1,50 @@
+stages:
+  - build
+  - restart
+  - check
+  
+cache:
+  paths:
+    - lng-api/lng-api-service/target/
+    - lng-api/lng-api-service/lng-api-log/
+    - lng-api/lng-api-service/lng-api-dubbo-cache
+    - lng-upms/lng-upms-service/target/
+    - lng-upms/lng-upms-service/lng-upms-log/
+    - lng-upms/lng-upms-service/lng-upms-dubbo-cache
+    - lng-message/target/
+    - lng-message/lng-message-log
+    - lng-message/lng-message-dubbo-cache
+    - lng-time-task/target/
+    - lng-time-task/lng-time-task-log
+    - lng-time-task/lng-time-task-dubbo-cache
+    - lng-pay/lng-pay-service/target/
+    - lng-pay/lng-pay-service/lng-pay-log/
+
+build:
+  stage: build
+  script:
+    - ./mvnw clean install -Dmaven.test.skip=true
+  only:
+    - master
+
+restart:
+  stage: restart
+  script:
+    - pm2 restart pm2.config.js
+  only:
+    - master
+  
+check-status:
+  stage: check
+  script:
+    - mvn sonar:sonar -Dsonar.java.binaries=src
+    - pm2 list
+    - curl -s http://192.168.1.123:8989/manage/api/is-started
+    - curl -s http://192.168.1.123:1111/manage/upms/is-started
+    - curl -s http://192.168.1.123:8001/message/is-started
+    - curl -s http://192.168.1.123:8994/task/is-started
+    - curl -s http://192.168.1.123:8000/pay/is-started
+  allow_failure: true
+  only:
+    - master
+
