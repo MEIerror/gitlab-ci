@@ -11,6 +11,7 @@ variables:
 stages:
   - build
   - restart
+  - zabbix
 
 build:
   image: maven:alpine
@@ -37,3 +38,18 @@ restart:
     - docker push harbor.asoco.com.cn/dse/${CON_NAME}:latest
  only:
     - master                            
+
+zabbix:
+  stage: failed
+  before_script:
+    - which ssh-agent || sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_99" | tr -d '\r'| ssh-add
+    - ssh-add -l
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - /bin/zabbix_sender -z 192.168.1.82 -p 10051 -s dseci.example.com -k gitlab-ci -o "- 项目：$CI_PROJECT_NAME\n- 分支：$CI_COMMIT_REF_NAME\n- 提交人：$GITLAB_USER_NAME\n- URL:$CI_PROJECT_URL/pipelines"
+  when: on_failure
