@@ -1,0 +1,16 @@
+stages:
+  - build
+
+build:
+  image: java:openjdk-8-alpine
+  stage: build
+  script:
+    - ./gradlew clean build -x test
+    - ls -l *
+  artifacts:
+    name: ${CON_NAME}-$(date +%Y%m%d)-${CI_JOB_ID}
+    expire_in: 1 day
+    paths:
+      - build/libs/*.jar
+  only:
+    - master
