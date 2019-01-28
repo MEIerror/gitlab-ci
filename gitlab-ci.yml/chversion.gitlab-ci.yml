@@ -1,0 +1,32 @@
+stages:
+  - build
+  - restart
+
+  
+before_script:
+  - ARTIFACTID=$(grep -m 1 "<artifactId>" pom.xml|awk 'BEGIN {FS="<*>"} {print $2}'|sed 's/<.*$//')
+  - VERSION=$(grep -m 1 "<version>" pom.xml|awk 'BEGIN {FS="<*>"} {print $2}'|sed 's/<.*$//')
+
+
+cache:
+  paths:
+    - target/*.jar
+
+  
+build:
+  stage: build
+  script:
+    - mvn clean package
+  only:
+    - master
+    
+
+restart:
+  stage: restart
+  script:
+    - sed -i -e "s/ARTIFACTID/${ARTIFACTID}/" -e "s/VERSION/${VERSION}/" pm2.config.js
+    - cat pm2.config.js
+    - pm2 restart pm2.config.js
+    - pm2 l
+  only:
+    - master
