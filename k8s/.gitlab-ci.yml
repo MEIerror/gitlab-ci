@@ -1,0 +1,47 @@
+stages:
+  - build
+  - update
+  - k8s
+  - zabbix
+
+  
+variables:
+  CON_NAME: "maven-demo"
+  TAG: $CI_PIPELINE_ID
+  CON_PORT: 8081
+  HOST_PORT: 8081
+  HAR_NAME: dse
+  HAR_PASSWD: Dse.123456
+  K8SMASTER: 192.168.1.205
+
+build:
+  image: maven:alpine
+  stage: build
+  script:
+    - mvn clean package -Dmaven.test.skip=true
+    - docker build -t harbor.asoco.com.cn/dse/${CON_NAME}:${TAG} .
+  variables:
+    CI_DEBUG_TRACE: "true"
+
+    
+update:
+  stage: update
+  script:
+    - docker login -u ${HAR_NAME} -p ${HAR_PASSWD} harbor.asoco.com.cn
+    - docker push harbor.asoco.com.cn/dse/${CON_NAME}:${TAG}
+
+k8s:
+  stage: k8s
+  script:
+    - docker login -u ${HAR_NAME} -p ${HAR_PASSWD} harbor.asoco.com.cn
+    - sed -i "s/TAG/$TAG/" maven-dep.yml && cat maven-dep.yml
+#    - scp maven-dep.yml root@$K8SMASTER:/docker/k8s/demo
+    - kubectl apply -f maven-dep.yml
+    - kubectl rollout status deployment maven-demo-dep
+
+
+zabbix:
+  stage: zabbix
+  script:
+    - zabbix_sender -z 192.168.1.82 -p 10051 -s slave1.leilin.com -k gitlab-ci-test -o "- 工程：$CI_PROJECT_NAME\n- 分支：$CI_COMMIT_REF_NAME\n - 阶段：$CI_BUILD_NAME\n - 提交者：$GITLAB_USER_NAME\n- URL:$CI_PROJECT_URL"
+  when: on_failure
