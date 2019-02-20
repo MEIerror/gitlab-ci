@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rdb-dep
+spec:
+  selector:
+    matchLabels:
+      app: rdb
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: rdb
+    spec:
+#      nodeSelector:
+#        zone: slave1
+      imagePullSecrets:
+        - name: harbor-secret
+      containers:
+        - name: rdb-apie
+          image: harbor.asoco.com.cn/dse/rdb-apie:TAG
+          ports:
+            - name: apieport
+              containerPort: 9000
+        - name: rdb-read
+          image: harbor.asoco.com.cn/dse/rdb-read:TAG
+          ports:
+            - name: readport
+              containerPort: 8090
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rdb-dep
+  name: rdb-svc
+  namespace: default
+spec:
+  ports:
+  - name: apie9000
+    nodePort: 30080
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    app: rdb
+  type: NodePort
