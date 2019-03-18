@@ -37,3 +37,18 @@ check_interval = 0
     pull_policy = "if-not-present"
     shm_size = 0
   [runners.cache]
+
+[[runners]]
+  name = "ChemicalIndustryPark-1.202-docker"
+  url = "http://192.168.1.116/"
+  token = "9d980e4a83834fb3d972f8f6befc0f"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "harbor.asoco.com.cn/android/android-env:v3"
+    privileged = false
+    disable_cache = false
+    volumes = ["/cache", "/docker/ci-cache/.gradle:/root/.gradle"]
+    pull_policy = "if-not-present"
+    shm_size = 0
+  [runners.cache]
